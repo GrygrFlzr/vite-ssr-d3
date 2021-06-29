@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+env:
+  CI: true
+
+jobs:
+  Lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '14.x'
+      - name: Cache ~/.pnpm-store
+        uses: actions/cache@main
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-${{ matrix.node-version }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.node-version }}
+      - run: npm install -g pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build --filter ./packages --filter !./packages/create-svelte/templates
+      - run: pnpm lint
+      - run: pnpm check
+  Tests:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 6
+    strategy:
+      matrix:
+        node-version: [14]
+        os: [ubuntu-latest, macOS-latest, windows-latest]
+        include:
+          - node-version: 12
+            os: ubuntu-latest
+          - node-version: 16
+            os: ubuntu-latest
+    steps:
+      - run: git config --global core.autocrlf false
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Get paths for OS
+        uses: ./.github/actions/env
+        id: paths
+      - run: npm install -g pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm dev
