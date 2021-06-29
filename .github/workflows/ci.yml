@@ -26,9 +26,6 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
-      - name: Get paths for OS
-        uses: ./.github/actions/env
-        id: paths
       - run: npm install -g pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm dev
