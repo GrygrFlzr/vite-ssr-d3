@@ -11,11 +11,7 @@ async function server() {
 	/** @type {vite.ViteDevServer} */
 	const viteInstance = await vite.createServer({
 		plugins: [],
-		server: { middlewareMode: true },
-		// @ts-ignore
-		ssr: {
-			noExternal: ['d3'],
-		},
+		server: { middlewareMode: true }
 	});
 
 	app.use(viteInstance.middlewares);
